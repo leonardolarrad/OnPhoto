@@ -5,18 +5,28 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView display;
     Button camera;
     Button gallery;
+
+    String currentImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,31 +59,100 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onCameraClicked(View v) {
-        askCameraPermissions();
+        requestOpenCamera();
     }
 
     private void onGalleryClicked(View v) {
 
     }
 
-    private void askCameraPermissions() {
-        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-
-        if (cameraPermission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA }, CAMERA_PERMISSION_REQUEST_CODE);
-        }
-        else {
-            openCamera();
-        }
-    }
-
     private void askGalleryPermissions() {
 
     }
 
+    private void askCameraPermission() {
+        ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.CAMERA },
+                CAMERA_PERMISSION_REQUEST_CODE);
+    }
+
+    private boolean requestOpenCamera() {
+        int cameraPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+
+        if (cameraPermission == PackageManager.PERMISSION_GRANTED)
+            openCamera();
+        else
+            askCameraPermission();
+
+        return cameraPermission == PackageManager.PERMISSION_GRANTED;
+    }
+
     private void openCamera() {
+        System.out.println("A1");
         Intent nativeCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (nativeCamera.resolveActivity(getPackageManager()) == null)
+            return; // @error
+
+        File imageFile = null;
+        try {
+            imageFile = createImageFile();
+        } catch (IOException ex) {
+            // @error
+        }
+
+        if (imageFile == null)
+            return; // @error
+
+        System.out.println("A2");
+        Uri imageURI = FileProvider.getUriForFile(
+                this,
+                "com.ucab.onphoto.android.fileprovider",
+                imageFile
+        );
+
+        System.out.println("A3");
+        nativeCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageURI);
         startActivityForResult(nativeCamera, CAMERA_REQUEST_CODE);
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "ONPHOTO_" + timeStamp;
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                storageDir
+        );
+
+        currentImagePath = image.getAbsolutePath();
+        return image;
+    }
+
+    private void saveImage(String imagePath) {
+        File file = new File(imagePath);
+
+        try {
+            MediaStore.Images.Media.insertImage(
+                    getContentResolver(),
+                    file.getAbsolutePath(),
+                    file.getName(),
+                    "Photo taked by OnPhoto (c).");
+        }
+        catch (FileNotFoundException ex) {
+            // @error
+        }
+    }
+
+    private void onCameraResult(int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK)
+            return; // @error
+
+        //display.setImageURI(uri);
+        saveImage(currentImagePath);
+
+        // Move to preview
     }
 
     private void openGallery() {
@@ -86,9 +167,7 @@ public class MainActivity extends AppCompatActivity {
             case CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                     openCamera();
-
                 break;
-
         }
 
     }
@@ -98,15 +177,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case CAMERA_REQUEST_CODE:
-
-                if (data == null)
-                    return;
-
-                Bitmap capture = (Bitmap) data.getExtras().get("data");
-                display.setImageBitmap(capture);
-
-                break;
+            case CAMERA_REQUEST_CODE: onCameraResult(resultCode, data); break;
         }
 
     }

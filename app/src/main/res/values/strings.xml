@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">OnPhoto</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="button_camera">Cámara</string>
+    <string name="button_gallery">Galería</string>
+    <string name="button_edit">Editar</string>
+    <string name="button_process">Procesar</string>
+    <string name="cd_logo">Logotype</string>
+    <string name="title_preview">Previsualización</string>
 </resources>
