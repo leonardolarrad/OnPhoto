@@ -62,9 +62,7 @@ public class ImagePreview extends Fragment {
         View view = inflater.inflate(R.layout.fragment_image_preview, container, false);
         preview = view.findViewById(R.id.ivPreview);
 
-
-
-        //setPreviewContent(imagePath);
+        setPreviewContent(imagePath);
         return view;
     }
 }

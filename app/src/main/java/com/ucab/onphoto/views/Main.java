@@ -35,6 +35,7 @@ public class Main extends Fragment {
 
     public static final int CAMERA_PERMISSION_REQUEST_CODE = 101;
     public static final int CAMERA_REQUEST_CODE = 102;
+    public static final int GALLERY_REQUEST_CODE = 103;
 
     ImageView display;
     Button camera;
@@ -76,14 +77,15 @@ public class Main extends Fragment {
 
 
     private void onCameraClicked(View v) {
+
         requestOpenCamera();
     }
 
     private void onGalleryClicked(View v) {
-
+        openGallery();
     }
 
-    private void askGalleryPermissions() {
+    private void askGalleryPermission() {
 
     }
 
@@ -169,14 +171,30 @@ public class Main extends Fragment {
         //display.setImageURI(uri);
         saveImage(currentImagePath);
 
-        // Move to preview
+        // Navigate to preview
         Bundle bundle = new Bundle();
         bundle.putString("imagePath", currentImagePath);
-        Navigation.findNavController(getView()).navigate(R.id.action_preview_image);
+        Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
     }
 
     private void openGallery() {
+        Intent nativeGallery = new Intent();
+        nativeGallery.setType("image/*");
+        nativeGallery.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(nativeGallery, "Selecciona una imagen"), GALLERY_REQUEST_CODE);
+    }
 
+    private void onGalleryResult(int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK || data == null)
+            return; // @error
+
+        Uri imageUri = data.getData();
+        currentImagePath = imageUri.getPath();
+
+        // Navigate to preview
+        Bundle bundle = new Bundle();
+        bundle.putString("imagePath", currentImagePath);
+        Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
     }
 
     @Override
@@ -189,7 +207,6 @@ public class Main extends Fragment {
                     openCamera();
                 break;
         }
-
     }
 
     @Override
@@ -197,7 +214,12 @@ public class Main extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         switch (requestCode) {
-            case CAMERA_REQUEST_CODE: onCameraResult(resultCode, data); break;
+            case CAMERA_REQUEST_CODE:
+                onCameraResult(resultCode, data);
+                break;
+
+            case GALLERY_REQUEST_CODE:
+                onGalleryResult(resultCode, data);
         }
 
     }
