@@ -1,5 +1,6 @@
 package com.ucab.onphoto.views;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,8 +8,11 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.ucab.onphoto.R;
+
+import java.io.File;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -17,50 +21,50 @@ import com.ucab.onphoto.R;
  */
 public class ImagePreview extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final String ARG_IMAGE_PATH = "imagePath";
+    private String imagePath;
+    private ImageView preview;
 
     public ImagePreview() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ImagePreviewFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ImagePreview newInstance(String param1, String param2) {
+    public static ImagePreview newInstance(String imagePath) {
         ImagePreview fragment = new ImagePreview();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_IMAGE_PATH, imagePath);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    private void setPreviewContent(String imagePath) {
+        if (preview == null)
+            return;
+
+        preview.setImageURI(Uri.fromFile(new File(imagePath)));
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            imagePath = getArguments().getString(ARG_IMAGE_PATH);
+
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_image_preview, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_image_preview, container, false);
+        preview = view.findViewById(R.id.ivPreview);
+
+
+
+        //setPreviewContent(imagePath);
+        return view;
     }
 }
