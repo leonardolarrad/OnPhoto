@@ -44,15 +44,17 @@ public class ImagePreview extends Fragment {
         preview.setImageURI(Uri.fromFile(new File(imagePath)));
     }
 
+    private void setPreviewContent(Uri uri) {
+        preview.setImageURI(uri);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
             imagePath = getArguments().getString(ARG_IMAGE_PATH);
-
         }
-
     }
 
     @Override
@@ -62,7 +64,7 @@ public class ImagePreview extends Fragment {
         View view = inflater.inflate(R.layout.fragment_image_preview, container, false);
         preview = view.findViewById(R.id.ivPreview);
 
-        setPreviewContent(imagePath);
+        setPreviewContent(Uri.parse(imagePath));
         return view;
     }
 }

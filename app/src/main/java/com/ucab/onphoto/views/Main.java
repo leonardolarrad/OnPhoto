@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -17,6 +18,7 @@ import androidx.navigation.Navigation;
 
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,7 +108,6 @@ public class Main extends Fragment {
     }
 
     private void openCamera() {
-        System.out.println("A1");
         Intent nativeCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         if (nativeCamera.resolveActivity(getActivity().getPackageManager()) == null)
@@ -122,14 +123,12 @@ public class Main extends Fragment {
         if (imageFile == null)
             return; // @error
 
-        System.out.println("A2");
         Uri imageURI = FileProvider.getUriForFile(
                 getActivity(),
                 "com.ucab.onphoto.android.fileprovider",
                 imageFile
         );
 
-        System.out.println("A3");
         nativeCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageURI);
         startActivityForResult(nativeCamera, CAMERA_REQUEST_CODE);
     }
@@ -173,8 +172,24 @@ public class Main extends Fragment {
 
         // Navigate to preview
         Bundle bundle = new Bundle();
-        bundle.putString("imagePath", currentImagePath);
+        //bundle.putString("imagePath", currentImagePath);
+        bundle.putString("imagePath", Uri.fromFile(new File(currentImagePath)).toString());
+
         Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
+    }
+
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        Cursor cursor = getActivity().getContentResolver().query(contentURI, new  String[] { MediaStore.Audio.Media.DATA }, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
     }
 
     private void openGallery() {
@@ -191,9 +206,16 @@ public class Main extends Fragment {
         Uri imageUri = data.getData();
         currentImagePath = imageUri.getPath();
 
+
+        System.out.println(imageUri.getPath());
+        System.out.println(imageUri.getEncodedPath());
+        System.out.println(getRealPathFromURI(imageUri));
+
+        currentImagePath = getRealPathFromURI(imageUri);
+
         // Navigate to preview
         Bundle bundle = new Bundle();
-        bundle.putString("imagePath", currentImagePath);
+        bundle.putString("imagePath", imageUri.toString());
         Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
     }
 
@@ -203,8 +225,9 @@ public class Main extends Fragment {
 
         switch (requestCode) {
             case CAMERA_PERMISSION_REQUEST_CODE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera();
+                }
                 break;
         }
     }

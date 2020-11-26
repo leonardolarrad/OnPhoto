@@ -47,7 +47,7 @@
         android:fontFamily="sans-serif"
         android:text="@string/title_preview"
         android:textColor="@color/white_1"
-        android:textSize="25sp"
+        android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.115"
