@@ -37,7 +37,8 @@ public class Main extends Fragment {
 
     public static final int CAMERA_PERMISSION_REQUEST_CODE = 101;
     public static final int CAMERA_REQUEST_CODE = 102;
-    public static final int GALLERY_REQUEST_CODE = 103;
+    public static final int GALLERY_PERMISSION_REQUEST_CODE = 103;
+    public static final int GALLERY_REQUEST_CODE = 104;
 
     ImageView display;
     Button camera;
@@ -77,18 +78,80 @@ public class Main extends Fragment {
         return view;
     }
 
-
-    private void onCameraClicked(View v) {
-
-        requestOpenCamera();
-    }
+    /*
+        GALLERY
+    */ 
 
     private void onGalleryClicked(View v) {
-        openGallery();
+        requestOpenGallery();
+    } 
+   
+    private void askGalleryPermission() {
+        ActivityCompat.requestPermissions(
+            getActivity(), 
+            new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 
+            GALLERY_PERMISSION_REQUEST_CODE
+        );
     }
 
-    private void askGalleryPermission() {
+    private boolean requestOpenGallery() {        
+        int galleryPermission = ContextCompat.checkSelfPermission(getActivity(),
+             Manifest.permission.READ_EXTERNAL_STORAGE);
 
+        if (galleryPermission == PackageManager.PERMISSION_GRANTED)
+            openGallery();
+        else
+            askGalleryPermission();
+
+        return galleryPermission == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        Cursor cursor = getActivity().getContentResolver().query(contentURI, new  String[] { MediaStore.Audio.Media.DATA }, null, null, null);
+        if (cursor == null) { 
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
+    }
+
+    private void openGallery() {
+        Intent nativeGallery = new Intent();
+        nativeGallery.setType("image/*");
+        nativeGallery.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(nativeGallery, "Selecciona una imagen"), GALLERY_REQUEST_CODE);
+    }
+
+    private void onGalleryResult(int resultCode, @Nullable Intent data) {
+        if (resultCode != Activity.RESULT_OK || data == null)
+            return; // @error
+
+        Uri imageUri = data.getData();
+        currentImagePath = imageUri.getPath();
+
+        System.out.println(imageUri.getPath());
+        System.out.println(imageUri.getEncodedPath());
+        System.out.println(getRealPathFromURI(imageUri));
+
+        currentImagePath = getRealPathFromURI(imageUri);
+
+        // Navigate to preview
+        Bundle bundle = new Bundle();
+        bundle.putString("imagePath", imageUri.toString());
+        Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
+    }
+
+    /*
+        CAMERA
+    */    
+    
+    private void onCameraClicked(View v) {
+        requestOpenCamera();
     }
 
     private void askCameraPermission() {
@@ -178,46 +241,7 @@ public class Main extends Fragment {
         Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
     }
 
-    private String getRealPathFromURI(Uri contentURI) {
-        String result;
-        Cursor cursor = getActivity().getContentResolver().query(contentURI, new  String[] { MediaStore.Audio.Media.DATA }, null, null, null);
-        if (cursor == null) { // Source is Dropbox or other similar local file path
-            result = contentURI.getPath();
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            result = cursor.getString(idx);
-            cursor.close();
-        }
-        return result;
-    }
 
-    private void openGallery() {
-        Intent nativeGallery = new Intent();
-        nativeGallery.setType("image/*");
-        nativeGallery.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(nativeGallery, "Selecciona una imagen"), GALLERY_REQUEST_CODE);
-    }
-
-    private void onGalleryResult(int resultCode, @Nullable Intent data) {
-        if (resultCode != Activity.RESULT_OK || data == null)
-            return; // @error
-
-        Uri imageUri = data.getData();
-        currentImagePath = imageUri.getPath();
-
-
-        System.out.println(imageUri.getPath());
-        System.out.println(imageUri.getEncodedPath());
-        System.out.println(getRealPathFromURI(imageUri));
-
-        currentImagePath = getRealPathFromURI(imageUri);
-
-        // Navigate to preview
-        Bundle bundle = new Bundle();
-        bundle.putString("imagePath", imageUri.toString());
-        Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -227,6 +251,11 @@ public class Main extends Fragment {
             case CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera();
+                }
+                break;
+            case GALLERY_PERMISSION_REQUEST_CODE: 
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    openGallery();
                 }
                 break;
         }
@@ -243,6 +272,7 @@ public class Main extends Fragment {
 
             case GALLERY_REQUEST_CODE:
                 onGalleryResult(resultCode, data);
+                break;
         }
 
     }
