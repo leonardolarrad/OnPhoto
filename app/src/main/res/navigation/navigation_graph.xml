@@ -7,9 +7,9 @@
 
     <fragment
         android:id="@+id/main"
-        android:name="com.ucab.onphoto.views.Main"
+        android:name="com.ucab.onphoto.views.MenuView"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
+        tools:layout="@layout/fragment_menu" >
         <action
             android:id="@+id/action_preview_image"
             app:destination="@id/imagePreview"
@@ -18,7 +18,7 @@
     </fragment>
     <fragment
         android:id="@+id/imagePreview"
-        android:name="com.ucab.onphoto.views.ImagePreview"
+        android:name="com.ucab.onphoto.views.PreviewView"
         android:label="fragment_image_preview"
-        tools:layout="@layout/fragment_image_preview" />
+        tools:layout="@layout/fragment_preview" />
 </navigation>

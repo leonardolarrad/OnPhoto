@@ -10,7 +10,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
@@ -18,7 +17,6 @@ import androidx.navigation.Navigation;
 
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +31,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Main extends Fragment {
+public class MenuView extends Fragment {
 
     public static final int CAMERA_PERMISSION_REQUEST_CODE = 101;
     public static final int CAMERA_REQUEST_CODE = 102;
@@ -46,12 +44,12 @@ public class Main extends Fragment {
 
     String currentImagePath;
 
-    public Main() {
+    public MenuView() {
         // Required empty public constructor
     }
 
-    public static Main newInstance() {
-        Main fragment = new Main();
+    public static MenuView newInstance() {
+        MenuView fragment = new MenuView();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -66,7 +64,7 @@ public class Main extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_menu, container, false);
 
         display = view.findViewById(R.id.ivCapture);
         camera = view.findViewById(R.id.btnCamera);
@@ -87,8 +85,7 @@ public class Main extends Fragment {
     } 
    
     private void askGalleryPermission() {
-        ActivityCompat.requestPermissions(
-            getActivity(), 
+        requestPermissions(
             new String[]{ Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 
             GALLERY_PERMISSION_REQUEST_CODE
         );
@@ -134,9 +131,9 @@ public class Main extends Fragment {
         Uri imageUri = data.getData();
         currentImagePath = imageUri.getPath();
 
-        System.out.println(imageUri.getPath());
-        System.out.println(imageUri.getEncodedPath());
-        System.out.println(getRealPathFromURI(imageUri));
+       // System.out.println(imageUri.getPath());
+       // System.out.println(imageUri.getEncodedPath());
+       // System.out.println(getRealPathFromURI(imageUri));
 
         currentImagePath = getRealPathFromURI(imageUri);
 
@@ -155,7 +152,7 @@ public class Main extends Fragment {
     }
 
     private void askCameraPermission() {
-        ActivityCompat.requestPermissions(getActivity(), new String[] { Manifest.permission.CAMERA },
+       requestPermissions(new String[] { Manifest.permission.CAMERA },
                 CAMERA_PERMISSION_REQUEST_CODE);
     }
 
@@ -246,16 +243,20 @@ public class Main extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         switch (requestCode) {
             case CAMERA_PERMISSION_REQUEST_CODE:
+                System.out.println("camera permission granted [0]");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera();
+                    System.out.println("camera access granted [1]");
                 }
                 break;
             case GALLERY_PERMISSION_REQUEST_CODE: 
+                System.out.println("gallery permission granted [0]");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openGallery();
+                    System.out.println("gallery access granted [1]");
                 }
                 break;
         }
