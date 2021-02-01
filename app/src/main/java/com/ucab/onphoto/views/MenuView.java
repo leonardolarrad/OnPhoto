@@ -243,20 +243,18 @@ public class MenuView extends Fragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+
         switch (requestCode) {
             case CAMERA_PERMISSION_REQUEST_CODE:
                 System.out.println("camera permission granted [0]");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera();
-                    System.out.println("camera access granted [1]");
                 }
                 break;
             case GALLERY_PERMISSION_REQUEST_CODE: 
                 System.out.println("gallery permission granted [0]");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openGallery();
-                    System.out.println("gallery access granted [1]");
                 }
                 break;
         }
@@ -275,6 +273,5 @@ public class MenuView extends Fragment {
                 onGalleryResult(resultCode, data);
                 break;
         }
-
     }
 }

@@ -20,31 +20,31 @@ import java.io.ByteArrayOutputStream;
 
 public class ProcessorService {
 
-    public interface Callback {
-        public void onProcess(Response response);
-    }
-
-    public class Response {
+    public static class Response {
 
         @Nullable
-        public final ReverseSearchResult reverseSearchResult;
+        public final ReverseSearchResult searchResult;
 
         public final String message;
 
-        public Response(@Nullable ReverseSearchResult reverseSearchResult, String message) {
-            this.reverseSearchResult = reverseSearchResult;
+        public Response(@Nullable ReverseSearchResult searchResult, String message) {
+            this.searchResult = searchResult;
             this.message = message;
         }
 
         public boolean success() {
-            return reverseSearchResult != null;
+            return searchResult != null;
         }
     }
 
-    private RequestQueue requestQueue;
-    private StorageService storageService;
-    private ReverseService reverseService;
-    private Callback callback;
+    public interface Callback {
+        void onProcess(Response response);
+    }
+
+    private final RequestQueue requestQueue;
+    private final StorageService storageService;
+    private final ReverseService reverseService;
+    private final Callback callback;
 
     public ProcessorService(RequestQueue requestQueue, Callback callback) {
 
@@ -73,7 +73,7 @@ public class ProcessorService {
 
     protected byte[] compress(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
         return stream.toByteArray();
     }
 
@@ -194,6 +194,5 @@ public class ProcessorService {
 
         return new ReverseSearchResult(match, lowMatch, similarImages);
     }
-
 
 }

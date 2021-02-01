@@ -8,4 +8,6 @@
     <string name="button_process">Procesar</string>
     <string name="cd_logo">Logotype</string>
     <string name="title_preview">Previsualización</string>
+    <string name="title_result">Resultados de la búsqueda</string>
+    <string name="title_result_images">Imagenes similares</string>
 </resources>

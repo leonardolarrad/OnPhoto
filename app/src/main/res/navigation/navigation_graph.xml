@@ -20,5 +20,14 @@
         android:id="@+id/imagePreview"
         android:name="com.ucab.onphoto.views.PreviewView"
         android:label="fragment_image_preview"
-        tools:layout="@layout/fragment_preview" />
+        tools:layout="@layout/fragment_preview" >
+        <action
+            android:id="@+id/action_process_image"
+            app:destination="@id/processView" />
+    </fragment>
+    <fragment
+        android:id="@+id/processView"
+        android:name="com.ucab.onphoto.views.ResultView"
+        android:label="fragment_process"
+        tools:layout="@layout/fragment_result" />
 </navigation>

@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.provider.MediaStore;
 import android.util.Log;
@@ -135,12 +136,10 @@ public class PreviewView extends Fragment {
         }
 
         /* Navigate to Result View */
-        for (ReverseSearchObject match : response.reverseSearchResult.match)
-            Log.i("Match", match.title);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("searchResult", response.searchResult);
 
-        for (ReverseSearchObject lowMatch : response.reverseSearchResult.lowMatch)
-            Log.i("LowMatch", lowMatch.title);
-
+        Navigation.findNavController(getView()).navigate(R.id.action_process_image, bundle);
     }
 
 }
