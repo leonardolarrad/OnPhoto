@@ -153,6 +153,22 @@ public class PreviewView extends Fragment {
             onEditorResult(resultCode, data);
     }
 
+    private String getRealPathFromURI(Uri contentURI) {
+        String result;
+        Cursor cursor = getActivity().getContentResolver().
+                query(contentURI, new  String[] { MediaStore.Audio.Media.DATA }, null, null, null);
+
+        if (cursor == null) {
+            result = contentURI.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
+    }
+
     public void lastPhoto() {
         Log.i("LastPhoto", "Taking last photo");
         // Find the last picture
@@ -172,12 +188,20 @@ public class PreviewView extends Fragment {
             String imageLocation = cursor.getString(1);
             File imageFile = new File(imageLocation);
 
-            if (imageFile.exists()) {   // TODO: is there a better way to do this?
+            if (imageFile.exists()) {
                 //Bitmap bm = BitmapFactory.decodeFile(imageLocation);
                 //setPreviewContent(bm);
                 //imagePath = imageFile.getPath();
-                bitmap = BitmapFactory.decodeFile(imageLocation);
-                setPreviewContent(bitmap);
+                Log.e("Path", imagePath);
+                Log.e("Path2", Uri.fromFile(imageFile).getPath());
+                Log.e("Path3", getRealPathFromURI(Uri.fromFile(imageFile)));
+                Log.e("Path4", imageFile.getAbsolutePath());
+                Log.e("Path5", "file://" + imageFile.getAbsolutePath());
+                Log.e("Path6", imageLocation);
+
+
+                setPreviewContent(BitmapFactory.decodeFile(imageLocation));
+                imagePath = "file://" + imageFile.getAbsolutePath();
             }
         }
 
