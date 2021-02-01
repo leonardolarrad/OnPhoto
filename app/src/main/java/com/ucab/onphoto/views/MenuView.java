@@ -190,6 +190,7 @@ public class MenuView extends Fragment {
         );
 
         nativeCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageURI);
+        nativeCamera.putExtra("android.intent.extras.CAMERA_FACING", 1);
         startActivityForResult(nativeCamera, CAMERA_REQUEST_CODE);
     }
 
@@ -238,21 +239,17 @@ public class MenuView extends Fragment {
         Navigation.findNavController(getView()).navigate(R.id.action_preview_image, bundle);
     }
 
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
             case CAMERA_PERMISSION_REQUEST_CODE:
-                System.out.println("camera permission granted [0]");
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openCamera();
                 }
                 break;
-            case GALLERY_PERMISSION_REQUEST_CODE: 
-                System.out.println("gallery permission granted [0]");
+            case GALLERY_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     openGallery();
                 }

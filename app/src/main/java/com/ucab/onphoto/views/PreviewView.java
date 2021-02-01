@@ -1,14 +1,22 @@
 package com.ucab.onphoto.views;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +44,12 @@ public class PreviewView extends Fragment {
     private static final String ARG_IMAGE_PATH = "imagePath";
     private String imagePath;
 
+    private Bitmap bitmap;
+
+    /* Intent request codes */
+    private static final int EDITOR_REQUEST_CODE = 105;
+    private boolean edited = false;
+
     /* View buttons and picture box */
     private ImageView preview;
     private Button edit;
@@ -56,6 +70,10 @@ public class PreviewView extends Fragment {
         args.putString(ARG_IMAGE_PATH, imagePath);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    private void setPreviewContent(Bitmap bitmap) {
+        preview.setImageBitmap(bitmap);
     }
 
     private void setPreviewContent(String imagePath) {
@@ -98,23 +116,94 @@ public class PreviewView extends Fragment {
         return view;
     }
 
-
+    /* IMAGE EDITOR */
 
     private void onEditButtonClick(View v) {
         tryEdit();
     }
 
     private void tryEdit() {
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
+        edited = true;
+
         Intent editIntent = new Intent(Intent.ACTION_EDIT);
         editIntent.setDataAndType(Uri.parse(imagePath), "image/*");
         editIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        //startActivity(editIntent);
+
         startActivity(Intent.createChooser(editIntent, null));
     }
 
+    private void onEditorResult( int resultCode, @Nullable Intent data) {
+        Log.i("EditorResult", "Has result");
+
+        if (resultCode != Activity.RESULT_OK && data == null)
+            return; // @error
+
+        Bitmap image = (Bitmap) data.getExtras().get("data");
+        setPreviewContent(image);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == EDITOR_REQUEST_CODE)
+            onEditorResult(resultCode, data);
+    }
+
+    public void lastPhoto() {
+        Log.i("LastPhoto", "Taking last photo");
+        // Find the last picture
+        String[] projection = new String[]{
+                MediaStore.Images.ImageColumns._ID,
+                MediaStore.Images.ImageColumns.DATA,
+                MediaStore.Images.ImageColumns.DATE_ADDED,
+                MediaStore.Images.ImageColumns.MIME_TYPE
+        };
+        final Cursor cursor = getActivity().getContentResolver()
+                .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null,
+                        null, MediaStore.Images.ImageColumns.DATE_ADDED + " DESC");
+
+        // Put it in the image view
+        if (cursor.moveToFirst()) {
+
+            String imageLocation = cursor.getString(1);
+            File imageFile = new File(imageLocation);
+
+            if (imageFile.exists()) {   // TODO: is there a better way to do this?
+                //Bitmap bm = BitmapFactory.decodeFile(imageLocation);
+                //setPreviewContent(bm);
+                //imagePath = imageFile.getPath();
+                bitmap = BitmapFactory.decodeFile(imageLocation);
+                setPreviewContent(bitmap);
+            }
+        }
+
+        edited = false;
+        cursor.close();
+    }
+
+    @Override
+    public void onStart() {
+        Log.e("onStart", "onResume of LoginFragment. Edited: " + edited);
+        super.onStart();
+
+        int galleryPermission = ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        Log.i("Permissions", "Has sotrage permission: " + (galleryPermission == PackageManager.PERMISSION_GRANTED));
+
+        if (edited)
+            lastPhoto();
+    }
+
+    /* IMAGE PROCESSOR */
+
     private void onProcessButtonClick(View v)  {
         try {
-            Bitmap image =
+            Bitmap image = (bitmap != null) ? bitmap :
                     MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.parse(imagePath));
 
             processorService.process(image);
@@ -141,5 +230,4 @@ public class PreviewView extends Fragment {
 
         Navigation.findNavController(getView()).navigate(R.id.action_process_image, bundle);
     }
-
 }
