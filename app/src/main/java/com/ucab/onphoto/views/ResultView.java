@@ -3,12 +3,16 @@ package com.ucab.onphoto.views;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ucab.onphoto.R;
 import com.ucab.onphoto.model.ReverseSearchObject;
@@ -32,6 +36,8 @@ public class ResultView extends Fragment {
 
     /* Views */
     private ListView objectList;
+    private TextView resultTitle;
+    private Button btnHome;
 
     /* Adapters */
     private ReverseObjectAdapter objectAdapter;
@@ -86,10 +92,21 @@ public class ResultView extends Fragment {
         objectList = (ListView) view.findViewById(R.id.reverse_search_object);
         objectList.setAdapter(objectAdapter);
 
+        resultTitle = view.findViewById(R.id.resultTitle);
+        btnHome = view.findViewById(R.id.btnHome);
+
+        if (!searchResult.hasMatches() && !searchResult.hasLowMatches()) {
+            resultTitle.setText("No se han encontrado resultados en la búsqueda.");
+            Toast.makeText(getActivity(), "Compruebe que la imagen contenga un objeto de ferretería a identificar.", Toast.LENGTH_LONG).show();
+        }
+
+        btnHome.setOnClickListener(this::onHomeClick);
+
         return view;
     }
 
-    private void renderResults() {
-
+    private void onHomeClick(View v) {
+        Navigation.findNavController(getView())
+                .navigate(R.id.action_go_home);
     }
 }

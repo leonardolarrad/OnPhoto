@@ -29,5 +29,9 @@
         android:id="@+id/processView"
         android:name="com.ucab.onphoto.views.ResultView"
         android:label="fragment_process"
-        tools:layout="@layout/fragment_result" />
+        tools:layout="@layout/fragment_result" >
+        <action
+            android:id="@+id/action_go_home"
+            app:destination="@id/main" />
+    </fragment>
 </navigation>

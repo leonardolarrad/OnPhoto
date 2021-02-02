@@ -13,7 +13,7 @@ import org.json.JSONObject;
 public class ReverseService {
 
     protected final static String URL = "https://app.zenserp.com/api/v2/search";
-    protected final static String KEY = "0453d970-6353-11eb-bc8c-0fd3446a40a6";
+    protected final static String KEY = "06397020-64e7-11eb-9daf-a16bd5aed242";
     protected final static String GL = "VE";
     protected final static String HL = "es";
 
