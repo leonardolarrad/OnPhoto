@@ -25,28 +25,12 @@
         <ListView
             android:id="@+id/reverse_search_object"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:divider="@color/background_1" >
+            android:layout_height="match_parent"
+            android:layout_gravity="center|fill"
+            android:divider="@color/background_1">
 
         </ListView>
 
-        <Button
-            android:id="@+id/btnHome"
-            android:layout_gravity="center"
-            android:layout_marginVertical="15dp"
-            android:layout_width="120dp"
-            android:layout_height="67dp"
-            android:backgroundTint="@color/foreground_1"
-            android:text="@string/button_ok"
-            android:textColor="@color/white_1"
-            app:icon="@drawable/ic_ok"
-            app:iconPadding="0dp"
-            app:iconTint="@color/white_1"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.748" />
+
 
 </LinearLayout>

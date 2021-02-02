@@ -89,11 +89,15 @@ public class ResultView extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_result, container, false);
 
-        objectList = (ListView) view.findViewById(R.id.reverse_search_object);
+        objectList = view.findViewById(R.id.reverse_search_object);
         objectList.setAdapter(objectAdapter);
 
+        View viewGroup = inflater.inflate(R.layout.cardview_footer, objectList, false);
+        objectList.addFooterView(viewGroup);
+
+        btnHome = viewGroup.findViewById(R.id.btnHome);
         resultTitle = view.findViewById(R.id.resultTitle);
-        btnHome = view.findViewById(R.id.btnHome);
+
 
         if (!searchResult.hasMatches() && !searchResult.hasLowMatches()) {
             resultTitle.setText("No se han encontrado resultados en la búsqueda.");
@@ -101,7 +105,6 @@ public class ResultView extends Fragment {
         }
 
         btnHome.setOnClickListener(this::onHomeClick);
-
         return view;
     }
 
